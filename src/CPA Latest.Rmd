@@ -1,7 +1,6 @@
 ---
 title: "Customer Personality Analysis"
 author: "Group 7 - Isaac Yang, Pengxiang Chen, Raihan Putra, Zhiqi Rui"
-date: "2021-12-09"
 output:
   html_document: default
   pdf_document: default
@@ -29,9 +28,15 @@ library(stringr)
 library(corrgram)
 ```
 
-# Data 
+# Initial Hypothesis
+These questions are our initial hypothesis that we believe can be answered by the dataset:
+1. Does age and education level affect customer's preference to buy product from the company?
+2. Does customer that has been engaged with the company for a long time buy more products?
+3. Does marital status and number of child changes customer's behavious on buying product from the company?
+
+# Dataset
 ```{r, warning = FALSE}
-data <- read.csv2("../data/marketing_campaign.csv", sep = "\t")
+data <- read.csv2("marketing_campaign.csv", sep = "\t")
 
 sum(is.na(data))
 data <- na.omit(data)
@@ -43,9 +48,9 @@ str(data)
 ```
 The data is mixed type data (i.e. both categorical and continuous values). Euclidean distance is commonly used for clustering algorithms like KMeans and hierarchical clustering but it is useful when we only have to deal with continuous values. Thus, we will use Gower distance as the distance metric.
 
-Gower distance is computed as the average of partial dissimilarities across individuals. Each partial dissimilarity (and thus Gower distance) ranges in [0 1].
+Gower distance is computed as the average of partial dissimilarities across individuals. Each partial dissimilarity (and thus Gower distance) ranges in [0 1]. To calculated this distance, we use cluster::daisy() instead of stats::dist().
 
-# Data Cleaning 
+## Data Cleaning 
 To work with the data we need to alter some variables and add a few new variables based on the existing ones. 
 
 1. Year_Birth, changing it to the Age variable.
@@ -100,17 +105,9 @@ data$Num_Purchases_made <-
 8. Thus, we are left with 12 variables that can be used to create the distance matrix.
 ```{r, warning = FALSE}
 data <- data[c(1, 30, 3, 4, 5, 33, 32, 9, 34, 35, 16, 20)]
-```
-
-<<<<<<< Updated upstream
-=======
-9. Thus, we are left with 12 variables that can be used to create the distance matrix.
-```{r, warning = FALSE}
-data <- data[c(1, 30, 3, 4, 5, 33, 32, 9, 34, 35, 16, 20)]
 data <- data[data$Income<4e05,]
 ```
 
->>>>>>> Stashed changes
 # Exploratory Data Analysis
 ## Corrgram 
 
@@ -132,6 +129,8 @@ corrgram(
 
 Strong Correlation between Income, Amount Spent and Purchase, as well as slight trend between Education and Income (PG: 1, UG: 2) tells us that people with higher studies earn more.
 
+
+## Charts
 1. Age
 ```{r, warning = FALSE}
 age_plot <- ggplot(data = data, aes(Age))
@@ -247,6 +246,7 @@ pam_results2 <- data %>%
 
 pam_results2$the_summary
 ```
+
 We can interpret from the cluster summary that 4 types of customers here are: 
 
 * Cluster 1: Avg Income | Senior Customers | Spending Avg Amount
@@ -273,14 +273,11 @@ ggplot(aes(x = X, y = Y), data = tsne_data2) +
 data2 <- data
 
 data2$Education <- unclass(as.factor(data2$Education))
-
 data2$Marital_Status <- unclass(as.factor(data2$Marital_Status))
-
 data2$Education <- as.numeric(data2$Education)
-
 data2$Marital_Status <- as.numeric(data2$Marital_Status)
 
-data_new <- read.csv2("../data/marketing_campaign.csv", sep = "\t")
+data_new <- read.csv2("marketing_campaign.csv", sep = "\t")
 data_new <- na.omit(data_new)
 data_new <- data_new[data_new$Income<4e05,]
 
@@ -352,7 +349,7 @@ plot(1:10, sil_width3,
 lines(1:10, sil_width3)
 ```
 
-By silhouette method we can choose 4 clusters.
+By silhouette method we can choose 3 clusters.
 
 ### Cluster summary
 ```{r, warning = FALSE}
@@ -366,12 +363,11 @@ pam_results3 <- data3 %>%
 
 pam_results3$the_summary
 ```
+
 We can interpret from the cluster summary that 3 types of customers here are: 
 
-* Cluster 1: Couple or Not Single people | More Post Graduates | Higher than Avg Income | Highest Buyer of Wine & Meat | Gold Purchase also Above Avg | Overall Purchase and Amount Spent also Highest 
-
-* Cluster 2: Singles | Post Graduates | Avg Income | Below Avg Amount Spent | Greater Deal Purchases than Cluster One Customers 
-
+* Cluster 1: Couple or Not Single people | More Post Graduates | Higher than Avg Income | Highest Buyer of Wine & Meat | Gold Purchase also Above Avg | Overall Purchase and Amount Spent also Highest
+* Cluster 2: Singles | Post Graduates | Avg Income | Below Avg Amount Spent | Greater Deal Purchases than Cluster One Customers
 * Cluster 3: Couples | Mostly Post Graduates (But also includes relatively higher number of Undergrads compared to other clusters) | Below Avg Income | Low Amount Spent | More Deal focused Purchases | Would prefer essentials over leisure (Gold and Sweets)
 
 ### Visualizing cluster
